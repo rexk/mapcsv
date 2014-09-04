@@ -38,18 +38,19 @@ func (r *Reader) Read() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if r.Line == 0 && r.FieldsAtFirstLine {
+		r.fields = record
+		r.Line++
+		return r.Read()
+	}
 	if r.Line == 0 {
-		if r.FieldsAtFirstLine {
-			r.fields = record
-			r.Line++
-			return r.Read()
-		}
 		fieldLen := len(record)
 		var fields []string
 		for i := 0; i < fieldLen; i++ {
 			fields = append(fields, strconv.Itoa(i))
 		}
 		r.fields = fields
+		r.Line++
 	}
 	r.Line++
 	recordMap := make(map[string]string)
