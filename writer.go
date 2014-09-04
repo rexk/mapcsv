@@ -8,16 +8,26 @@ import (
 	"sort"
 )
 
+// A Writer writes records to a CSV encoded file.
+//
+// A Writer operates exactly same as encoding/csv/Writer except that it takes
+// map[string]string instead of []string
+//
+// It also takes Fields name as []string if one wants to write fields name
+// at the top of the stream
 type Writer struct {
 	*csv.Writer
 	Fields []string
 	Line   int
 }
 
+// NewWriter returns a new Writer that writes to csv.Writer
 func NewWriter(w *csv.Writer) *Writer {
 	return &Writer{w, []string{}, 0}
 }
 
+// Writer writes a single CSV record to csv.Writer by converting given map
+// into []string
 func (w *Writer) Write(record map[string]string) (err error) {
 	numKeys := len(record)
 	var keys []string
@@ -47,14 +57,18 @@ func (w *Writer) Write(record map[string]string) (err error) {
 	return w.Writer.Write(arrRecords)
 }
 
+// Error reports any error that has occurred during a previous Write or Flush.
 func (w *Writer) Error() error {
 	return w.Writer.Write(nil)
 }
 
+// Flush writes any buffered data to the underlying io.Writer.
+// To check if an error occured during the Flush, call Error.
 func (w *Writer) Flush() {
 	w.Writer.Flush()
 }
 
+// WriteAll writes multiple CSV reports to csv.Writer an then calls Flush.
 func (w *Writer) WriteAll(records []map[string]string) (err error) {
 	for _, record := range records {
 		err = w.Write(record)
@@ -63,5 +77,5 @@ func (w *Writer) WriteAll(records []map[string]string) (err error) {
 		}
 	}
 	w.Flush()
-	return nil
+	return w.Error()
 }
