@@ -37,13 +37,17 @@ func (w *Writer) Write(record map[string]string) (err error) {
 	sort.Strings(keys)
 	numFields := len(w.Fields)
 	arrRecords := make([]string, numKeys)
+
 	// Recording fields at the very first line
 	if w.Line == 0 && numFields != 0 {
 		w.Line++
-		return w.Writer.Write(w.Fields)
+		err = w.Writer.Write(w.Fields)
+		if err != nil {
+			return err
+		}
 	}
 
-	// There is no Designated field, so convert key value as integer and fill out out array
+	// There is no Designated field, so convert key value as integer and fill out an array
 	if numFields == 0 {
 		for i, val := range keys {
 			arrRecords[i] = record[val]
